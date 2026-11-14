@@ -1,5 +1,20 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794639189156,
+      "tag": "0000_meals4cheap_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794639322036,
+      "tag": "0001_slot_capacity_guard",
+      "breakpoints": true
+    }
+  ]
 }
