@@ -13,8 +13,8 @@ import { formatSlot } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/orders/$orderId")({
-  validateSearch: (s: Record<string, unknown>): { paid?: string } => ({
-    paid: typeof s.paid === "string" ? s.paid : undefined,
+  validateSearch: (s: Record<string, unknown>): { paid?: string | undefined } => ({
+    paid: typeof s["paid"] === "string" ? s["paid"] : undefined,
   }),
   head: () => ({
     meta: [

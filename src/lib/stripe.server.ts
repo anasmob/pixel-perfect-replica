@@ -33,11 +33,13 @@ async function stripe<T>(method: "GET" | "POST", path: string, params?: Params, 
   const headers: Record<string, string> = { Authorization: `Bearer ${key}` };
   if (method === "POST") headers["Content-Type"] = "application/x-www-form-urlencoded";
   if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
-  const res = await fetch(url, { method, headers, body: method === "POST" ? body : undefined });
+  const init: RequestInit = { method, headers };
+  if (method === "POST" && body !== undefined) init.body = body;
+  const res = await fetch(url, init);
   const json = (await res.json()) as T & { error?: { message?: string; code?: string } };
   if (!res.ok) {
     console.error(`[stripe] ${method} ${path} failed [${res.status}]`, json.error);
-    const err = new Error(json.error?.message ?? `Stripe request failed (${res.status})`) as Error & { code?: string };
+    const err = new Error(json.error?.message ?? `Stripe request failed (${res.status})`) as Error & { code?: string | undefined };
     err.code = json.error?.code;
     throw err;
   }

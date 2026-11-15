@@ -44,7 +44,7 @@ type Action = "confirm" | "decline" | "ready" | "picked_up";
 
 export const updateOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { orderId: string; action: Action; reason?: string; code?: string }) => {
+  .inputValidator((input: { orderId: string; action: Action; reason?: string | undefined; code?: string | undefined }) => {
     const actions: Action[] = ["confirm", "decline", "ready", "picked_up"];
     if (!actions.includes(input.action)) throw new Error("Invalid action.");
     return {

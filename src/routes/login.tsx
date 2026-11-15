@@ -8,9 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { safeRedirect } from "@/lib/validation";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>): { redirect?: string; confirmed?: string } => ({
-    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
-    confirmed: typeof s.confirmed === "string" ? s.confirmed : undefined,
+  validateSearch: (s: Record<string, unknown>): { redirect?: string | undefined; confirmed?: string | undefined } => ({
+    redirect: typeof s["redirect"] === "string" ? s["redirect"] : undefined,
+    confirmed: typeof s["confirmed"] === "string" ? s["confirmed"] : undefined,
   }),
   head: () => ({
     meta: [

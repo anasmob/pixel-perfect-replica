@@ -25,13 +25,13 @@ function SignupPage() {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Partial<Record<"firstName" | "email" | "password" | "form", string>>>({});
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const errs: Record<string, string> = {};
+    const errs: Partial<Record<"firstName" | "email" | "password" | "form", string>> = {};
     if (!firstName.trim()) errs.firstName = "Enter your first name.";
     if (!isEduEmail(email)) errs.email = "Use your school email ending in .edu.";
     if (password.length < 8) errs.password = "Use at least 8 characters.";

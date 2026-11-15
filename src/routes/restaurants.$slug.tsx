@@ -47,7 +47,7 @@ function RestaurantPage() {
 
   const lines = dishes
     .filter((d) => (pack[d.id] ?? 0) > 0)
-    .map((d) => ({ id: d.id, name: d.name, quantity: pack[d.id], unitPriceCents: d.price_cents }));
+    .map((d) => ({ id: d.id, name: d.name, quantity: pack[d.id] ?? 0, unitPriceCents: d.price_cents }));
   const price = computePackPrice(lines, r.discount_percent);
   const inRange = isMealCountAllowed(price.mealCount, r.min_meals, r.max_meals);
   const atMax = price.mealCount >= r.max_meals;

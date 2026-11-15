@@ -15,8 +15,8 @@ import { dayKey, formatDay, formatSlot, formatTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/checkout/$slug")({
-  validateSearch: (s: Record<string, unknown>): { cancelled?: string } => ({
-    cancelled: typeof s.cancelled === "string" ? s.cancelled : undefined,
+  validateSearch: (s: Record<string, unknown>): { cancelled?: string | undefined } => ({
+    cancelled: typeof s["cancelled"] === "string" ? s["cancelled"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -49,7 +49,7 @@ function CheckoutPage() {
     () =>
       (rq.data?.dishes ?? [])
         .filter((d) => (pack[d.id] ?? 0) > 0)
-        .map((d) => ({ id: d.id, name: d.name, quantity: pack[d.id], unitPriceCents: d.price_cents })),
+        .map((d) => ({ id: d.id, name: d.name, quantity: pack[d.id] ?? 0, unitPriceCents: d.price_cents })),
     [rq.data, pack],
   );
 

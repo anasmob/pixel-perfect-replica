@@ -42,7 +42,7 @@ function RestaurantSignupPage() {
     email: "",
     password: "",
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -50,8 +50,8 @@ function RestaurantSignupPage() {
     e.preventDefault();
     const errs: Record<string, string> = {};
     for (const f of fields) if (!values[f.id].trim()) errs[f.id] = `Enter ${f.label.toLowerCase()}.`;
-    if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) errs.email = "Enter a valid email.";
-    if (values.password && values.password.length < 8) errs.password = "Use at least 8 characters.";
+    if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) errs["email"] = "Enter a valid email.";
+    if (values.password && values.password.length < 8) errs["password"] = "Use at least 8 characters.";
     setErrors(errs);
     if (Object.keys(errs).length) return;
     setBusy(true);
@@ -119,7 +119,7 @@ function RestaurantSignupPage() {
             <FieldError>{errors[f.id]}</FieldError>
           </div>
         ))}
-        <FieldError>{errors.form}</FieldError>
+        <FieldError>{errors["form"]}</FieldError>
         <Button type="submit" className="w-full" disabled={busy}>
           {busy ? "Submitting…" : "Submit application"}
         </Button>
