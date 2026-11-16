@@ -54,7 +54,7 @@ function OfferForm({ restaurant }: { restaurant: { id: string; discount_percent:
   };
 
   return (
-    <form onSubmit={save} className="surface h-fit space-y-4 p-5">
+    <form onSubmit={save} noValidate className="surface h-fit space-y-4 p-5">
       <h2 className="text-lg font-semibold">Offer</h2>
       <div>
         <Label htmlFor="discount">Discount (%)</Label>
@@ -187,7 +187,7 @@ function DishForm({ restaurantId, dish, onDone }: { restaurantId: string; dish?:
   };
 
   return (
-    <form onSubmit={save} className="surface grid gap-3 bg-panel p-4 sm:grid-cols-[1fr_8rem]">
+    <form onSubmit={save} noValidate className="surface grid gap-3 bg-panel p-4 sm:grid-cols-[1fr_8rem]">
       <div>
         <Label htmlFor="dish-name">Name</Label>
         <Input id="dish-name" className="mt-1.5 h-11 bg-card" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />

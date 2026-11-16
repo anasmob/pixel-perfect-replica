@@ -28,3 +28,16 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules (meals4cheap)
+
+- Pricing math lives only in `src/lib/pricing.ts` (integer cents); server code recomputes every price, never trusts client totals.
+- Commission and payout amounts live in `order_financials` / `restaurant_private`, readable only by the owning restaurant, so students can never query them.
+- All order status changes and order inserts go through server functions with the admin client (Stripe calls); clients have read-only RLS access to orders.
+- Stripe is called via fetch in `src/lib/stripe.server.ts` (edge-runtime safe); Checkout uses manual capture: capture on confirm, cancel on decline/expiry.
+- The 30-minute response window counts only pickup-hour minutes (`src/lib/deadline.ts`), capped at the booked slot start.
+- Expiry runs lazily on order/dashboard reads plus a 15-minute scheduled call to `/api/public/jobs/sweep-orders`.
+- Pickup slots are materialized 7 days ahead from weekly `pickup_hours` by `regenerate_slots()` (on save + daily pg_cron); a DB trigger enforces slot capacity on order insert.
+- Signup role/profile/restaurant rows are created by the `handle_new_user` trigger, which also rejects non-.edu student emails.
+- Order emails go through `src/lib/notify.server.ts`; provider not connected yet, so messages are only logged.
+- Dark mode follows the system via `prefers-color-scheme`; no theme toggle.
