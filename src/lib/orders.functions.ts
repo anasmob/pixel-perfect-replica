@@ -66,7 +66,13 @@ export const createCheckout = createServerFn({ method: "POST" })
     const slot = (slots ?? []).find((s) => s.slot_id === data.slotId);
     if (!slot) throw new Error("That pickup slot is no longer available. Please choose another one.");
 
-    const { data: priv } = await admin.from("restaurant_private").select("commission_percent").eq("restaurant_id", r.id).single();
+    const { data: priv } = await admin
+      .from("restaurant_private")
+      .select("commission_percent, stripe_account_id, stripe_payouts_ready")
+      .eq("restaurant_id", r.id)
+      .single();
+    // Restaurants with Stripe payouts set up get their share automatically when the payment is captured.
+    const destination = priv?.stripe_payouts_ready && priv.stripe_account_id ? priv.stripe_account_id : null;
     const commissionPercent = Number(priv?.commission_percent ?? 10);
     const commission = computeCommission(price.totalCents, commissionPercent);
     const { data: profile } = await admin.from("profiles").select("first_name").eq("id", userId).maybeSingle();
@@ -119,6 +125,7 @@ export const createCheckout = createServerFn({ method: "POST" })
       commission_percent: commissionPercent,
       commission_cents: commission.commissionCents,
       restaurant_payout_cents: commission.restaurantPayoutCents,
+      transfer_destination: destination,
     });
 
     try {
@@ -132,6 +139,9 @@ export const createCheckout = createServerFn({ method: "POST" })
           cancel_url: `${data.origin}/checkout/${r.slug}?cancelled=1`,
           payment_intent_data: {
             capture_method: "manual",
+            ...(destination
+              ? { application_fee_amount: commission.commissionCents > 0 ? commission.commissionCents : undefined, transfer_data: { destination } }
+              : {}),
             description: `meals4cheap order ${code}`,
             metadata: { order_id: orderId, order_code: code },
           },
@@ -182,7 +192,7 @@ export const getMyOrder = createServerFn({ method: "POST" })
     const { data: order } = await supabase
       .from("orders")
       .select(
-        "id, code, status, meal_count, menu_total_cents, discount_percent, discount_cents, total_cents, slot_start, decline_reason, placed_at, response_deadline, created_at, restaurant:restaurants(id, name, address, timezone, slug), items:order_items(dish_name, unit_price_cents, quantity)",
+        "id, code, status, meal_count, menu_total_cents, discount_percent, discount_cents, total_cents, slot_start, decline_reason, placed_at, response_deadline, created_at, restaurant:restaurants(id, name, address, timezone, slug, logo_url), items:order_items(dish_name, unit_price_cents, quantity)",
       )
       .eq("id", data.orderId)
       .single();
@@ -212,7 +222,7 @@ export const listMyOrders = createServerFn({ method: "POST" })
     }
     const { data: orders, error } = await supabase
       .from("orders")
-      .select("id, code, status, meal_count, total_cents, slot_start, created_at, restaurant:restaurants(name, timezone)")
+      .select("id, code, status, meal_count, total_cents, slot_start, created_at, restaurant:restaurants(name, timezone, logo_url)")
       .not("status", "in", "(pending_payment,cancelled)")
       .order("created_at", { ascending: false })
       .limit(100);

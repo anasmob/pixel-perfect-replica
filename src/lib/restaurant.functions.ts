@@ -135,3 +135,131 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
     }
     return { status: "picked_up" };
   });
+
+// ----- Payouts (Stripe Connect Express) -----
+export interface PayoutStatus {
+  paymentsConfigured: boolean;
+  connected: boolean;
+  detailsSubmitted: boolean;
+  payoutsReady: boolean;
+  actionNeeded: boolean;
+}
+
+function safeOrigin(origin: string) {
+  const u = new URL(origin);
+  if (u.protocol !== "https:" && u.hostname !== "localhost") throw new Error("Invalid request.");
+  return u.origin;
+}
+
+function connectError(e: unknown): Error {
+  console.error("[payouts] stripe error", e);
+  const msg = e instanceof Error ? e.message : "";
+  if (msg.startsWith("Card payments")) return new Error("Payments are not set up on meals4cheap yet, so payouts can't be connected.");
+  if (/signed up for Connect|Connect/i.test(msg)) return new Error("Payouts are not switched on for meals4cheap yet. Please try again later.");
+  return new Error("Stripe could not be reached. Please try again.");
+}
+
+export const getPayoutStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<PayoutStatus> => {
+    const { supabase, userId } = context;
+    const r = await ownRestaurant(supabase, userId);
+    if (!r) throw new Error("No restaurant found for this account.");
+    const { paymentsConfigured, retrieveAccount, isPayoutReady } = await import("./stripe.server");
+    const { data: priv } = await supabase
+      .from("restaurant_private")
+      .select("stripe_account_id, stripe_details_submitted, stripe_payouts_ready")
+      .eq("restaurant_id", r.id)
+      .maybeSingle();
+    const base: PayoutStatus = {
+      paymentsConfigured: paymentsConfigured(),
+      connected: !!priv?.stripe_account_id,
+      detailsSubmitted: !!priv?.stripe_details_submitted,
+      payoutsReady: !!priv?.stripe_payouts_ready,
+      actionNeeded: false,
+    };
+    if (!priv?.stripe_account_id || !base.paymentsConfigured) return base;
+    try {
+      const acct = await retrieveAccount(priv.stripe_account_id);
+      const ready = isPayoutReady(acct);
+      if (ready !== priv.stripe_payouts_ready || acct.details_submitted !== priv.stripe_details_submitted) {
+        const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+        await admin
+          .from("restaurant_private")
+          .update({ stripe_details_submitted: acct.details_submitted, stripe_payouts_ready: ready })
+          .eq("restaurant_id", r.id);
+      }
+      return {
+        ...base,
+        detailsSubmitted: acct.details_submitted,
+        payoutsReady: ready,
+        actionNeeded: (acct.requirements?.currently_due?.length ?? 0) > 0,
+      };
+    } catch (e) {
+      console.error("[payouts] status refresh failed", e);
+      return base;
+    }
+  });
+
+export const startPayoutSetup = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { origin: string }) => ({ origin: safeOrigin(String(input.origin)) }))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const r = await ownRestaurant(supabase, userId);
+    if (!r) throw new Error("No restaurant found for this account.");
+    const { createExpressAccount, createAccountLink } = await import("./stripe.server");
+    const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+    const { data: priv } = await admin
+      .from("restaurant_private")
+      .select("stripe_account_id, email")
+      .eq("restaurant_id", r.id)
+      .single();
+    try {
+      let accountId = priv?.stripe_account_id ?? null;
+      if (!accountId) {
+        const acct = await createExpressAccount(
+          {
+            type: "express",
+            country: "US",
+            email: priv?.email ?? undefined,
+            business_profile: { name: r.name, product_description: "Restaurant meal packs for student pickup" },
+            capabilities: { card_payments: { requested: true }, transfers: { requested: true } },
+            metadata: { restaurant_id: r.id },
+          },
+          `connect-account-${r.id}`,
+        );
+        accountId = acct.id;
+        await admin.from("restaurant_private").update({ stripe_account_id: accountId }).eq("restaurant_id", r.id);
+      }
+      const link = await createAccountLink(
+        accountId,
+        `${data.origin}/dashboard/payouts?refresh=1`,
+        `${data.origin}/dashboard/payouts?return=1`,
+      );
+      return { url: link.url };
+    } catch (e) {
+      throw connectError(e);
+    }
+  });
+
+export const openPayoutDashboard = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const r = await ownRestaurant(supabase, userId);
+    if (!r) throw new Error("No restaurant found for this account.");
+    const { data: priv } = await supabase
+      .from("restaurant_private")
+      .select("stripe_account_id, stripe_details_submitted")
+      .eq("restaurant_id", r.id)
+      .maybeSingle();
+    if (!priv?.stripe_account_id || !priv.stripe_details_submitted) throw new Error("Finish setting up payouts first.");
+    const { createLoginLink } = await import("./stripe.server");
+    try {
+      const link = await createLoginLink(priv.stripe_account_id);
+      return { url: link.url };
+    } catch (e) {
+      throw connectError(e);
+    }
+  });

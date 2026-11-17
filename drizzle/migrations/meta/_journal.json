@@ -29,6 +29,13 @@
       "when": 1794845413483,
       "tag": "0003_tighten_function_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794896711517,
+      "tag": "0004_restaurant_media_and_payouts",
+      "breakpoints": true
     }
   ]
 }

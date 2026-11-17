@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PackTicket } from "@/components/site/PackTicket";
+import { RestaurantLogo } from "@/components/site/RestaurantLogo";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/site/States";
 import { FieldError } from "@/components/site/AuthCard";
 import { useAuth } from "@/hooks/use-auth";
@@ -117,7 +118,13 @@ function CheckoutPage() {
       <Link to="/restaurants/$slug" params={{ slug }} className="text-sm text-muted-foreground hover:text-foreground">
         ← Edit pack
       </Link>
-      <h1 className="mt-4 text-3xl font-semibold">Checkout</h1>
+      <div className="mt-4 flex items-center gap-3">
+        <RestaurantLogo name={r.name} logoUrl={r.logo_url} />
+        <div>
+          <h1 className="text-3xl font-semibold">Checkout</h1>
+          <p className="text-sm text-muted-foreground">{r.name}</p>
+        </div>
+      </div>
       {search.cancelled ? (
         <p className="mt-4 rounded-lg bg-panel p-3 text-sm">Payment was cancelled. Your card was not charged.</p>
       ) : null}

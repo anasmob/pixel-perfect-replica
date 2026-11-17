@@ -7,6 +7,21 @@ export class PaymentsNotConfiguredError extends Error {
 
 type Params = Record<string, unknown>;
 
+/** The app runs in Stripe test mode only: keys that are not test keys are ignored, so no real card is charged. */
+function stripeKey(): string | null {
+  const key = process.env["STRIPE_SECRET_KEY"] || process.env["STRIPE_LIVE_API_KEY"] || "";
+  if (!key) return null;
+  if (!/^(sk|rk)_test_/.test(key)) {
+    console.error("[stripe] the saved Stripe key is not a test-mode key; card payments stay off");
+    return null;
+  }
+  return key;
+}
+
+export function paymentsConfigured() {
+  return stripeKey() !== null;
+}
+
 function encode(params: Params, prefix = "", out = new URLSearchParams()): URLSearchParams {
   for (const [k, v] of Object.entries(params)) {
     if (v === undefined || v === null) continue;
@@ -26,7 +41,7 @@ function encode(params: Params, prefix = "", out = new URLSearchParams()): URLSe
 }
 
 async function stripe<T>(method: "GET" | "POST", path: string, params?: Params, idempotencyKey?: string): Promise<T> {
-  const key = process.env["STRIPE_SECRET_KEY"];
+  const key = stripeKey();
   if (!key) throw new PaymentsNotConfiguredError();
   const body = params ? encode(params).toString() : undefined;
   const url = method === "GET" && body ? `https://api.stripe.com/v1${path}?${body}` : `https://api.stripe.com/v1${path}`;
@@ -86,4 +101,40 @@ export async function cancelPaymentIntent(id: string) {
     if (code === "payment_intent_unexpected_state") return null;
     throw e;
   }
+}
+
+// ----- Stripe Connect (Express accounts) for restaurant payouts -----
+export interface ConnectAccount {
+  id: string;
+  details_submitted: boolean;
+  charges_enabled: boolean;
+  payouts_enabled: boolean;
+  capabilities?: { transfers?: string; card_payments?: string };
+  requirements?: { currently_due?: string[]; disabled_reason?: string | null };
+}
+
+export function createExpressAccount(params: Params, idempotencyKey: string) {
+  return stripe<ConnectAccount>("POST", "/accounts", params, idempotencyKey);
+}
+
+export function retrieveAccount(id: string) {
+  return stripe<ConnectAccount>("GET", `/accounts/${encodeURIComponent(id)}`);
+}
+
+export function createAccountLink(account: string, refreshUrl: string, returnUrl: string) {
+  return stripe<{ url: string }>("POST", "/account_links", {
+    account,
+    refresh_url: refreshUrl,
+    return_url: returnUrl,
+    type: "account_onboarding",
+  });
+}
+
+export function createLoginLink(account: string) {
+  return stripe<{ url: string }>("POST", `/accounts/${encodeURIComponent(account)}/login_links`, {});
+}
+
+/** A connected account can receive the restaurant's share once Stripe has activated transfers for it. */
+export function isPayoutReady(a: ConnectAccount) {
+  return a.details_submitted && a.capabilities?.transfers === "active";
 }

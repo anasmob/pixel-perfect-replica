@@ -29,6 +29,8 @@ export interface RestaurantCard {
   discount_percent: number;
   min_meals: number;
   max_meals: number;
+  logo_url: string | null;
+  cover_url: string | null;
   next_slot: string | null;
 }
 
@@ -47,7 +49,7 @@ export const getRestaurant = createServerFn({ method: "GET" })
     const sb = publicClient();
     const { data: r, error } = await sb
       .from("restaurants")
-      .select("id, slug, name, cuisine, address, timezone, is_demo, discount_percent, min_meals, max_meals, lead_time_hours")
+      .select("id, slug, name, cuisine, address, timezone, is_demo, discount_percent, min_meals, max_meals, lead_time_hours, logo_url, cover_url")
       .eq("slug", data.slug)
       .eq("is_approved", true)
       .maybeSingle();

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { RestaurantLogo } from "@/components/site/RestaurantLogo";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
@@ -45,7 +46,7 @@ function OrderPage() {
   });
 
   const order = q.data;
-  const rest = order?.restaurant as { id: string; name: string; address: string; timezone: string; slug: string } | null | undefined;
+  const rest = order?.restaurant as { id: string; name: string; address: string; timezone: string; slug: string; logo_url: string | null } | null | undefined;
 
   // Once payment is through, the pack in this browser is no longer needed.
   useEffect(() => {
@@ -99,7 +100,7 @@ function OrderPage() {
 
         <div className="ticket-divider my-6" />
         <dl className="space-y-2 text-sm">
-          <div className="flex justify-between gap-4"><dt className="text-muted-foreground">Restaurant</dt><dd className="text-right">{rest.name}</dd></div>
+          <div className="flex items-center justify-between gap-4"><dt className="text-muted-foreground">Restaurant</dt><dd className="flex items-center gap-2 text-right"><RestaurantLogo name={rest.name} logoUrl={rest.logo_url} size="sm" />{rest.name}</dd></div>
           <div className="flex justify-between gap-4"><dt className="text-muted-foreground">Address</dt><dd className="text-right">{rest.address}</dd></div>
           <div className="flex justify-between gap-4"><dt className="text-muted-foreground">Pickup</dt><dd className="text-right">{formatSlot(order.slot_start, rest.timezone)}</dd></div>
         </dl>

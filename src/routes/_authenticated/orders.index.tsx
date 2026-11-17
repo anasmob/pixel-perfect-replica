@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { RestaurantLogo } from "@/components/site/RestaurantLogo";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,7 @@ function OrdersPage() {
                   <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">{g.title}</h2>
                   <ul className="surface divide-y">
                     {g.list.map((o) => {
-                      const rest = o.restaurant as { name: string; timezone: string } | null;
+                      const rest = o.restaurant as { name: string; timezone: string; logo_url: string | null } | null;
                       return (
                         <li key={o.id}>
                           <Link
@@ -63,7 +64,9 @@ function OrdersPage() {
                             search={{}}
                             className="flex flex-col gap-2 p-4 hover:bg-panel sm:flex-row sm:items-center sm:justify-between"
                           >
-                            <div>
+                            <div className="flex items-start gap-3">
+                              {rest ? <RestaurantLogo name={rest.name} logoUrl={rest.logo_url} /> : null}
+                              <div>
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-sm">{o.code}</span>
                                 <StatusBadge status={o.status as OrderStatus} />
@@ -72,6 +75,7 @@ function OrdersPage() {
                               <p className="font-mono text-xs text-muted-foreground">
                                 {rest ? formatSlot(o.slot_start, rest.timezone) : ""}
                               </p>
+                              </div>
                             </div>
                             <div className="font-mono text-sm sm:text-right">
                               <div>{formatCents(o.total_cents)}</div>

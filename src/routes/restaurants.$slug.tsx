@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PackTicket } from "@/components/site/PackTicket";
+import { RestaurantCover, RestaurantLogo } from "@/components/site/RestaurantLogo";
 import { QuantityStepper } from "@/components/site/QuantityStepper";
 import { EmptyState } from "@/components/site/States";
 import { usePack } from "@/hooks/use-pack";
@@ -59,15 +60,19 @@ function RestaurantPage() {
       <Link to="/restaurants" className="text-sm text-muted-foreground hover:text-foreground">
         ← All restaurants
       </Link>
-      <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-semibold sm:text-4xl">{r.name}</h1>
-            {r.is_demo ? <Badge variant="muted">Demo</Badge> : null}
+      {r.cover_url ? <RestaurantCover url={r.cover_url} eager className="mt-4 aspect-[16/7] rounded-xl border sm:aspect-[16/5]" /> : null}
+      <div className={r.cover_url ? "mt-5 flex flex-wrap items-start justify-between gap-4" : "mt-4 flex flex-wrap items-start justify-between gap-4"}>
+        <div className="flex items-center gap-4">
+          <RestaurantLogo name={r.name} logoUrl={r.logo_url} size="lg" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-semibold sm:text-4xl">{r.name}</h1>
+              {r.is_demo ? <Badge variant="muted">Demo</Badge> : null}
+            </div>
+            <p className="mt-1 text-muted-foreground">
+              {r.cuisine} · {r.address}
+            </p>
           </div>
-          <p className="mt-1 text-muted-foreground">
-            {r.cuisine} · {r.address}
-          </p>
         </div>
         <Badge variant="discount" className="px-3 py-1.5 text-sm">
           {r.discount_percent}% off packs of {r.min_meals} to {r.max_meals}

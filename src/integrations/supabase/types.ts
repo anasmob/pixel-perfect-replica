@@ -64,6 +64,7 @@ export type Database = {
           payment_captured: boolean
           restaurant_id: string
           restaurant_payout_cents: number
+          transfer_destination: string | null
         }
         Insert: {
           commission_cents: number
@@ -73,6 +74,7 @@ export type Database = {
           payment_captured?: boolean
           restaurant_id: string
           restaurant_payout_cents: number
+          transfer_destination?: string | null
         }
         Update: {
           commission_cents?: number
@@ -82,6 +84,7 @@ export type Database = {
           payment_captured?: boolean
           restaurant_id?: string
           restaurant_payout_cents?: number
+          transfer_destination?: string | null
         }
         Relationships: [
           {
@@ -333,6 +336,9 @@ export type Database = {
           email: string | null
           phone: string
           restaurant_id: string
+          stripe_account_id: string | null
+          stripe_details_submitted: boolean
+          stripe_payouts_ready: boolean
         }
         Insert: {
           commission_percent?: number
@@ -340,6 +346,9 @@ export type Database = {
           email?: string | null
           phone?: string
           restaurant_id: string
+          stripe_account_id?: string | null
+          stripe_details_submitted?: boolean
+          stripe_payouts_ready?: boolean
         }
         Update: {
           commission_percent?: number
@@ -347,6 +356,9 @@ export type Database = {
           email?: string | null
           phone?: string
           restaurant_id?: string
+          stripe_account_id?: string | null
+          stripe_details_submitted?: boolean
+          stripe_payouts_ready?: boolean
         }
         Relationships: [
           {
@@ -361,6 +373,7 @@ export type Database = {
       restaurants: {
         Row: {
           address: string
+          cover_url: string | null
           created_at: string
           cuisine: string
           discount_percent: number
@@ -368,6 +381,7 @@ export type Database = {
           is_approved: boolean
           is_demo: boolean
           lead_time_hours: number
+          logo_url: string | null
           max_meals: number
           min_meals: number
           name: string
@@ -377,6 +391,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          cover_url?: string | null
           created_at?: string
           cuisine: string
           discount_percent?: number
@@ -384,6 +399,7 @@ export type Database = {
           is_approved?: boolean
           is_demo?: boolean
           lead_time_hours?: number
+          logo_url?: string | null
           max_meals?: number
           min_meals?: number
           name: string
@@ -393,6 +409,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          cover_url?: string | null
           created_at?: string
           cuisine?: string
           discount_percent?: number
@@ -400,6 +417,7 @@ export type Database = {
           is_approved?: boolean
           is_demo?: boolean
           lead_time_hours?: number
+          logo_url?: string | null
           max_meals?: number
           min_meals?: number
           name?: string
@@ -449,6 +467,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      owns_media_folder: { Args: { _name: string }; Returns: boolean }
       owns_restaurant: { Args: { _restaurant_id: string }; Returns: boolean }
       regenerate_all_slots: { Args: never; Returns: undefined }
       regenerate_slots: { Args: { _restaurant_id: string }; Returns: undefined }
@@ -456,10 +475,12 @@ export type Database = {
         Args: never
         Returns: {
           address: string
+          cover_url: string
           cuisine: string
           discount_percent: number
           id: string
           is_demo: boolean
+          logo_url: string
           max_meals: number
           min_meals: number
           name: string

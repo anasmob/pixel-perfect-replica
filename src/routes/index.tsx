@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { RestaurantCard } from "@/components/site/RestaurantCard";
 import { restaurantsQuery } from "@/lib/queries";
+import mealPacksPhoto from "@/assets/home-meal-packs.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -70,7 +71,18 @@ function Home() {
             </Button>
           </div>
         </div>
-        <HeroTicket />
+        <div className="relative lg:pb-10">
+          <img
+            src={mealPacksPhoto}
+            alt="Six takeaway containers of restaurant meals next to a paper pickup bag"
+            width={1600}
+            height={1000}
+            className="aspect-[16/10] w-full rounded-xl border object-cover lg:aspect-[4/5]"
+          />
+          <div className="relative mx-auto -mt-10 w-[88%] max-w-sm lg:absolute lg:-left-10 lg:bottom-0 lg:mt-0 lg:w-72">
+            <HeroTicket />
+          </div>
+        </div>
       </section>
 
       <section className="border-y bg-card">
@@ -145,7 +157,7 @@ function Home() {
 /** Illustrative ticket showing how a pack price is built. Uses example numbers, labelled as such. */
 function HeroTicket() {
   return (
-    <div className="ticket mx-auto w-full max-w-sm p-6 text-sm" aria-label="Example pack price">
+    <div className="ticket w-full p-5 text-sm" aria-label="Example pack price">
       <div className="flex items-center justify-between text-xs uppercase tracking-wider text-muted-foreground">
         <span>Example pack</span>
         <span>Pickup ticket</span>
