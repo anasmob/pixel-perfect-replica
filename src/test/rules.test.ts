@@ -102,3 +102,15 @@ describe("restaurant response deadline", () => {
     expect(d.toISOString()).toBe("2026-11-15T12:00:00.000Z");
   });
 });
+
+import { isTestModeKey } from "@/lib/stripe.server";
+describe("Stripe test mode only", () => {
+  it("accepts test secret and restricted keys", () => {
+    expect(isTestModeKey("sk_test_abc")).toBe(true);
+    expect(isTestModeKey("rk_test_abc")).toBe(true);
+  });
+  it("ignores live keys so no real card is charged", () => {
+    expect(isTestModeKey("sk_live_abc")).toBe(false);
+    expect(isTestModeKey("rk_live_abc")).toBe(false);
+  });
+});

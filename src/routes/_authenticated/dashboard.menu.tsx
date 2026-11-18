@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/site/States";
 import { FieldError } from "@/components/site/AuthCard";
+import { RestaurantPhotosForm } from "@/components/site/RestaurantPhotosForm";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { myRestaurantQuery } from "@/lib/dashboard-queries";
@@ -23,7 +24,10 @@ function MenuTab() {
   if (!rq.data) return <LoadingBlock />;
   return (
     <div className="grid gap-8 lg:grid-cols-[20rem_1fr]">
-      <OfferForm restaurant={rq.data} />
+      <div className="space-y-8">
+        <OfferForm restaurant={rq.data} />
+        <RestaurantPhotosForm restaurant={rq.data} />
+      </div>
       <DishList restaurantId={rq.data.id} />
     </div>
   );

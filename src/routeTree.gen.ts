@@ -23,6 +23,7 @@ import { Route as RestaurantsSlugRouteImport } from './routes/restaurants.$slug'
 import { Route as AuthenticatedCheckoutSlugRouteImport } from './routes/_authenticated/checkout.$slug'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedDashboardMenuRouteImport } from './routes/_authenticated/dashboard.menu'
+import { Route as AuthenticatedDashboardPayoutsRouteImport } from './routes/_authenticated/dashboard.payouts'
 import { Route as AuthenticatedDashboardSlotsRouteImport } from './routes/_authenticated/dashboard.slots'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders.index'
 import { Route as AuthenticatedOrdersOrderIdRouteImport } from './routes/_authenticated/orders.$orderId'
@@ -101,6 +102,12 @@ const AuthenticatedDashboardMenuRoute =
     path: '/menu',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardPayoutsRoute =
+  AuthenticatedDashboardPayoutsRouteImport.update({
+    id: '/payouts',
+    path: '/payouts',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardSlotsRoute =
   AuthenticatedDashboardSlotsRouteImport.update({
     id: '/slots',
@@ -144,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/restaurants/': typeof RestaurantsIndexRoute
   '/checkout/$slug': typeof AuthenticatedCheckoutSlugRoute
   '/dashboard/menu': typeof AuthenticatedDashboardMenuRoute
+  '/dashboard/payouts': typeof AuthenticatedDashboardPayoutsRoute
   '/dashboard/slots': typeof AuthenticatedDashboardSlotsRoute
   '/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -163,6 +171,7 @@ export interface FileRoutesByTo {
   '/restaurants': typeof RestaurantsIndexRoute
   '/checkout/$slug': typeof AuthenticatedCheckoutSlugRoute
   '/dashboard/menu': typeof AuthenticatedDashboardMenuRoute
+  '/dashboard/payouts': typeof AuthenticatedDashboardPayoutsRoute
   '/dashboard/slots': typeof AuthenticatedDashboardSlotsRoute
   '/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
@@ -185,6 +194,7 @@ export interface FileRoutesById {
   '/restaurants/': typeof RestaurantsIndexRoute
   '/_authenticated/checkout/$slug': typeof AuthenticatedCheckoutSlugRoute
   '/_authenticated/dashboard/menu': typeof AuthenticatedDashboardMenuRoute
+  '/_authenticated/dashboard/payouts': typeof AuthenticatedDashboardPayoutsRoute
   '/_authenticated/dashboard/slots': typeof AuthenticatedDashboardSlotsRoute
   '/_authenticated/orders/$orderId': typeof AuthenticatedOrdersOrderIdRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/restaurants/'
     | '/checkout/$slug'
     | '/dashboard/menu'
+    | '/dashboard/payouts'
     | '/dashboard/slots'
     | '/orders/$orderId'
     | '/dashboard/'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/restaurants'
     | '/checkout/$slug'
     | '/dashboard/menu'
+    | '/dashboard/payouts'
     | '/dashboard/slots'
     | '/orders/$orderId'
     | '/dashboard'
@@ -247,6 +259,7 @@ export interface FileRouteTypes {
     | '/restaurants/'
     | '/_authenticated/checkout/$slug'
     | '/_authenticated/dashboard/menu'
+    | '/_authenticated/dashboard/payouts'
     | '/_authenticated/dashboard/slots'
     | '/_authenticated/orders/$orderId'
     | '/_authenticated/dashboard/'
@@ -370,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardMenuRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/payouts': {
+      id: '/_authenticated/dashboard/payouts'
+      path: '/payouts'
+      fullPath: '/dashboard/payouts'
+      preLoaderRoute: typeof AuthenticatedDashboardPayoutsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/slots': {
       id: '/_authenticated/dashboard/slots'
       path: '/slots'
@@ -410,6 +430,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardMenuRoute: typeof AuthenticatedDashboardMenuRoute
+  AuthenticatedDashboardPayoutsRoute: typeof AuthenticatedDashboardPayoutsRoute
   AuthenticatedDashboardSlotsRoute: typeof AuthenticatedDashboardSlotsRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
@@ -417,6 +438,7 @@ interface AuthenticatedDashboardRouteChildren {
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardMenuRoute: AuthenticatedDashboardMenuRoute,
+    AuthenticatedDashboardPayoutsRoute: AuthenticatedDashboardPayoutsRoute,
     AuthenticatedDashboardSlotsRoute: AuthenticatedDashboardSlotsRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }

@@ -60,7 +60,7 @@ function DashboardLayout() {
           <p className="mt-1 text-muted-foreground">Students can't see your restaurant yet. You can set up your menu, offer and pickup hours in the meantime.</p>
         </div>
       ) : null}
-      <nav className="mt-6 flex gap-6 border-b" aria-label="Dashboard">
+      <nav className="mt-6 flex gap-6 overflow-x-auto border-b" aria-label="Dashboard">
         <Link to="/dashboard" activeOptions={{ exact: true }} className={tab} activeProps={active}>
           Orders
           {newCount > 0 ? (
@@ -71,6 +71,7 @@ function DashboardLayout() {
         </Link>
         <Link to="/dashboard/menu" className={tab} activeProps={active}>Menu and offer</Link>
         <Link to="/dashboard/slots" className={tab} activeProps={active}>Pickup slots</Link>
+        <Link to="/dashboard/payouts" className={tab} activeProps={active}>Payouts</Link>
       </nav>
       <div className="mt-6">
         <Outlet />

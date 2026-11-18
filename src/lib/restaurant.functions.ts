@@ -27,7 +27,7 @@ export const listRestaurantOrders = createServerFn({ method: "POST" })
     const { data, error } = await supabase
       .from("orders")
       .select(
-        "id, code, status, student_first_name, slot_start, meal_count, total_cents, menu_total_cents, discount_cents, decline_reason, placed_at, response_deadline, created_at, items:order_items(dish_name, quantity, unit_price_cents), fin:order_financials(commission_percent, commission_cents, restaurant_payout_cents)",
+        "id, code, status, student_first_name, slot_start, meal_count, total_cents, menu_total_cents, discount_cents, decline_reason, placed_at, response_deadline, created_at, items:order_items(dish_name, quantity, unit_price_cents), fin:order_financials(commission_percent, commission_cents, restaurant_payout_cents, transfer_destination)",
       )
       .eq("restaurant_id", r.id)
       .or(`status.in.(awaiting_restaurant,confirmed,ready),created_at.gte.${since}`)

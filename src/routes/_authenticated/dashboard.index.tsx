@@ -95,7 +95,7 @@ function OrderCard({ order, timezone }: { order: Order; timezone: string }) {
   const items = (order.items ?? []) as { dish_name: string; quantity: number }[];
   const finRaw = order.fin as unknown;
   const fin = (Array.isArray(finRaw) ? finRaw[0] : finRaw) as
-    | { commission_percent: number; commission_cents: number; restaurant_payout_cents: number }
+    | { commission_percent: number; commission_cents: number; restaurant_payout_cents: number; transfer_destination: string | null }
     | null;
 
   const act = async (action: "confirm" | "decline" | "ready" | "picked_up") => {
@@ -137,6 +137,9 @@ function OrderCard({ order, timezone }: { order: Order; timezone: string }) {
           <>
             <div className="flex justify-between"><dt className="text-muted-foreground">Commission {Number(fin.commission_percent)}%</dt><dd>-{formatCents(fin.commission_cents)}</dd></div>
             <div className="flex justify-between font-semibold"><dt>You receive</dt><dd>{formatCents(fin.restaurant_payout_cents)}</dd></div>
+            <p className="pt-1 font-sans text-muted-foreground">
+              {fin.transfer_destination ? "Sent to your Stripe account when you confirm." : "Paid out by meals4cheap (Stripe payouts not set up for this order)."}
+            </p>
           </>
         ) : null}
       </dl>

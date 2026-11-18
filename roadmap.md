@@ -4,6 +4,7 @@
 - [x] Restaurant side: sign-up (pending approval), orders board, menu and offer, pickup slots, For restaurants calculator
 - [x] Order lifecycle: authorize, confirm/capture, decline/expire/cancel hold, ready, picked up
 - [x] Demo data (3 restaurants, is_demo = true), Terms and Privacy placeholders
-- [ ] Stripe test secret key — waiting on user
+- [ ] Stripe test secret key — saved key is not a test key; waiting on user's test key
 - [ ] Email provider for order emails — waiting on user's choice
-- [ ] Restaurant payouts (e.g. Stripe Connect) — waiting on user's decision
+- [x] Restaurant payouts via Stripe Connect (Payouts tab) — end-to-end test waits on the test key
+- [x] Restaurant logos and cover photos (demo images + restaurant uploads), home photo

@@ -7,11 +7,15 @@ export class PaymentsNotConfiguredError extends Error {
 
 type Params = Record<string, unknown>;
 
+export function isTestModeKey(key: string) {
+  return /^(sk|rk)_test_/.test(key);
+}
+
 /** The app runs in Stripe test mode only: keys that are not test keys are ignored, so no real card is charged. */
 function stripeKey(): string | null {
   const key = process.env["STRIPE_SECRET_KEY"] || process.env["STRIPE_LIVE_API_KEY"] || "";
   if (!key) return null;
-  if (!/^(sk|rk)_test_/.test(key)) {
+  if (!isTestModeKey(key)) {
     console.error("[stripe] the saved Stripe key is not a test-mode key; card payments stay off");
     return null;
   }
