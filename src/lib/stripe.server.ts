@@ -13,10 +13,11 @@ export function isTestModeKey(key: string) {
 
 /** The app runs in Stripe test mode only: keys that are not test keys are ignored, so no real card is charged. */
 function stripeKey(): string | null {
-  const key = process.env["STRIPE_SECRET_KEY"] || process.env["STRIPE_LIVE_API_KEY"] || "";
-  if (!key) return null;
-  if (!isTestModeKey(key)) {
-    console.error("[stripe] the saved Stripe key is not a test-mode key; card payments stay off");
+  const names = ["STRIPE_TEST_API_KEY", "STRIPE_SECRET_KEY", "STRIPE_LIVE_API_KEY"];
+  const saved = names.map((n) => process.env[n]).filter((k): k is string => !!k);
+  const key = saved.find(isTestModeKey);
+  if (!key) {
+    if (saved.length) console.error("[stripe] no test-mode Stripe key saved; card payments stay off");
     return null;
   }
   return key;

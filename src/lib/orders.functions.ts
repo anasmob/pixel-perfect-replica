@@ -132,6 +132,8 @@ export const createCheckout = createServerFn({ method: "POST" })
       const session = await createCheckoutSession(
         {
           mode: "payment",
+          // Card only: card authorizations support the hold-then-capture flow reliably.
+          payment_method_types: ["card"],
           customer_email: authUser.user.email,
           client_reference_id: orderId,
           expires_at: Math.floor(Date.now() / 1000) + 31 * 60,
