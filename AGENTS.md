@@ -36,7 +36,7 @@ use the editor.
 - All order status changes and order inserts go through server functions with the admin client (Stripe calls); clients have read-only RLS access to orders.
 - Stripe is called via fetch in `src/lib/stripe.server.ts` (edge-runtime safe) and only accepts test-mode keys; Checkout uses manual capture: capture on confirm, cancel on decline/expiry.
 - Payouts use Stripe Connect Express destination charges (`application_fee_amount` = commission) only when `restaurant_private.stripe_payouts_ready`; status is refreshed from Stripe on the Payouts tab because there is no webhook.
-- Restaurant logos/covers live in the private `restaurant-media` bucket (`<restaurant_id>/...`, owner-only writes) and are served via `/api/public/media/*` so URLs are stable and cacheable (public buckets are blocked).
+- Restaurant logos/covers live in the private `restaurant-media` bucket (`<restaurant_id>/...`, owner-only reads/writes) and are served via `/api/public/media/*` with the admin client only when the file is a restaurant's current `logo_url`/`cover_url`, so URLs are stable and cacheable without exposing other uploads (public buckets are blocked).
 - The 30-minute response window counts only pickup-hour minutes (`src/lib/deadline.ts`), capped at the booked slot start.
 - Expiry runs lazily on order/dashboard reads plus a 15-minute scheduled call to `/api/public/jobs/sweep-orders`.
 - Pickup slots are materialized 7 days ahead from weekly `pickup_hours` by `regenerate_slots()` (on save + daily pg_cron); a DB trigger enforces slot capacity on order insert.

@@ -1,30 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
 
-// Serves restaurant logos and cover photos (public content) from the private "restaurant-media" bucket
-// with stable, cacheable URLs. Read-only; only paths inside that bucket can be fetched.
-const SAFE_PATH = /^[A-Za-z0-9_-]+\/[A-Za-z0-9._-]{1,150}$/;
+// Serves restaurant logos and cover photos from the private "restaurant-media" bucket with stable,
+// cacheable URLs. Storage itself is owner-only; this route only serves files that a restaurant is
+// currently using as its logo or cover photo, so other uploaded files stay private.
+const MEDIA_PREFIX = "/api/public/media/";
+const SAFE_PATH = /^[A-Za-z0-9_-]{1,40}\/[A-Za-z0-9_-]{1,140}\.(png|jpe?g|webp)$/;
 
 export const Route = createFileRoute("/api/public/media/$")({
   server: {
     handlers: {
       GET: async ({ params }) => {
         const path = String((params as { _splat?: string })._splat ?? "");
-        if (!SAFE_PATH.test(path) || path.includes("..")) return new Response("Not found", { status: 404 });
-        const url = process.env["SUPABASE_URL"]!;
-        const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-        const sb = createClient(url, key, {
-          auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-          global: {
-            fetch: (input, init) => {
-              const h = new Headers(init?.headers);
-              if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-              h.set("apikey", key);
-              return fetch(input, { ...init, headers: h });
-            },
-          },
-        });
-        const { data, error } = await sb.storage.from("restaurant-media").download(path);
+        if (!SAFE_PATH.test(path)) return new Response("Not found", { status: 404 });
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const url = `${MEDIA_PREFIX}${path}`;
+        const [{ count: logos }, { count: covers }] = await Promise.all([
+          supabaseAdmin.from("restaurants").select("id", { count: "exact", head: true }).eq("logo_url", url),
+          supabaseAdmin.from("restaurants").select("id", { count: "exact", head: true }).eq("cover_url", url),
+        ]);
+        if (!logos && !covers) return new Response("Not found", { status: 404 });
+        const { data, error } = await supabaseAdmin.storage.from("restaurant-media").download(path);
         if (error || !data) return new Response("Not found", { status: 404 });
         const ext = path.split(".").pop()?.toLowerCase();
         const type = ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
